@@ -6,3 +6,7 @@ First steps are to have a template which connects to the API and checks the basi
 
 
 Warning. Current version is an very early proof of concept. Dont use it!
+
+Anyone who wants to play with this.
+Import Template and set macros for $KEY, $ROUTER_URL and $SECRET.
+You need to create an API-Key on your opnsense to get the values needed!
