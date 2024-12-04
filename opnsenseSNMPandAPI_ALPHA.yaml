@@ -1,0 +1,485 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: e926bebfc5784f0491a26516f06a734e
+      template: 'itNGO - OPNsense SNMP and API'
+      name: 'itNGO - OPNsense SNMP and API'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 4681f6c84081482188b25249d019a53b
+          name: 'OPNsense: DHCP server status'
+          type: SNMP_AGENT
+          snmp_oid: '.1.3.6.1.2.1.25.4.2.1.7["index",".1.3.6.1.2.1.25.4.2.1.2","dhcpd"]'
+          key: opnsense.dhcpd.status
+          history: 7d
+          description: |
+            MIB: HOST-RESOURCES-MIB
+            The status of DHCP server process.
+          preprocessing:
+            - type: CHECK_NOT_SUPPORTED
+              parameters:
+                - '-1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          tags:
+            - tag: component
+              value: application
+          triggers:
+            - uuid: edebcf108052497c816ef0567f33298d
+              expression: 'last(/itNGO - OPNsense SNMP and API/opnsense.dhcpd.status)=0'
+              name: 'OPNsense: DHCP server is not running'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              status: DISABLED
+              priority: AVERAGE
+              description: 'Please check DHCP server settings.'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 7444d325712a48cd89f4b1a83455ed91
+          name: 'OPNsense: DNS server status'
+          type: SNMP_AGENT
+          snmp_oid: '.1.3.6.1.2.1.25.4.2.1.7["index",".1.3.6.1.2.1.25.4.2.1.2","unbound"]'
+          key: opnsense.dns.status
+          history: 7d
+          description: |
+            MIB: HOST-RESOURCES-MIB
+            The status of DNS server process.
+          preprocessing:
+            - type: CHECK_NOT_SUPPORTED
+              parameters:
+                - '-1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          tags:
+            - tag: component
+              value: application
+          triggers:
+            - uuid: a0cc7a1cffc648cb99adf4cbdc530a81
+              expression: 'last(/itNGO - OPNsense SNMP and API/opnsense.dns.status)=0'
+              name: 'OPNsense: DNS server is not running'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              description: 'Please check DNS server settings.'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 32cea8046f964ffeacf841c22913cc23
+          name: 'Firewall Rule Stats API Poll'
+          type: HTTP_AGENT
+          key: opnsense.fw.status.get
+          history: 1d
+          value_type: TEXT
+          trends: '0'
+          authtype: BASIC
+          username: '{$KEY}'
+          password: '{$SECRET}'
+          timeout: 5s
+          url: 'https://{$ROUTER_URL}/api/firewall/filter_util/ruleStats'
+        - uuid: d1195bc228b44386867c6af3604d2b51
+          name: 'Gateway Status API Poll'
+          type: HTTP_AGENT
+          key: opnsense.gw.status.get
+          history: 1d
+          value_type: TEXT
+          trends: '0'
+          authtype: BASIC
+          username: '{$KEY}'
+          password: '{$SECRET}'
+          timeout: 5s
+          url: 'https://{$ROUTER_URL}/api/routes/gateway/status'
+        - uuid: 452f7bb8685b427593caed23a6044856
+          name: 'OPNsense: Web server status'
+          type: SNMP_AGENT
+          snmp_oid: '.1.3.6.1.2.1.25.4.2.1.7["index",".1.3.6.1.2.1.25.4.2.1.2","lighttpd"]'
+          key: opnsense.lighttpd.status
+          history: 7d
+          status: DISABLED
+          description: |
+            MIB: HOST-RESOURCES-MIB
+            The status of lighttpd process.
+          preprocessing:
+            - type: CHECK_NOT_SUPPORTED
+              parameters:
+                - '-1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          tags:
+            - tag: component
+              value: application
+          triggers:
+            - uuid: bc2e54ff297641448419a635e5bf0750
+              expression: 'last(/itNGO - OPNsense SNMP and API/opnsense.lighttpd.status)=0'
+              name: 'OPNsense: Web server is not running'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              description: 'Please check lighttpd service status.'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: 0071982f689e4d31bb5e85e51a6b8826
+          name: 'OPNsense: Packets with bad offset'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.2.2.0
+          key: opnsense.packets.bad.offset
+          history: 7d
+          value_type: FLOAT
+          status: DISABLED
+          units: pps
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            True if the packet was logged with the specified packet filter reason code. The known codes are: match, bad-offset, fragment, short, normalize, and memory.
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: network
+        - uuid: 79a47c66d9cc417880a6c5966f7b9da4
+          name: 'OPNsense: Fragmented packets'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.2.3.0
+          key: opnsense.packets.fragment
+          history: 7d
+          value_type: FLOAT
+          status: DISABLED
+          units: pps
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            True if the packet was logged with the specified packet filter reason code. The known codes are: match, bad-offset, fragment, short, normalize, and memory.
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: network
+        - uuid: e0e534ddf5a043b1b3655b843fd94844
+          name: 'OPNsense: Packets matched a filter rule'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.2.1.0
+          key: opnsense.packets.match
+          history: 7d
+          value_type: FLOAT
+          status: DISABLED
+          units: pps
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            True if the packet was logged with the specified packet filter reason code. The known codes are: match, bad-offset, fragment, short, normalize, and memory.
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: network
+        - uuid: f667732bb1f4478492b0ff203bd76f4a
+          name: 'OPNsense: Packets dropped due to memory limitation'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.2.6.0
+          key: opnsense.packets.mem.drop
+          history: 7d
+          value_type: FLOAT
+          status: DISABLED
+          units: pps
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            True if the packet was logged with the specified packet filter reason code. The known codes are: match, bad-offset, fragment, short, normalize, and memory.
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: network
+        - uuid: e4ab5e9dea2d441cb0f0c4d4583ddaed
+          name: 'OPNsense: Normalized packets'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.2.5.0
+          key: opnsense.packets.normalize
+          history: 7d
+          value_type: FLOAT
+          status: DISABLED
+          units: pps
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            True if the packet was logged with the specified packet filter reason code. The known codes are: match, bad-offset, fragment, short, normalize, and memory.
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: network
+        - uuid: c33a9484e445428bb3600202fa5523d0
+          name: 'OPNsense: Short packets'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.2.4.0
+          key: opnsense.packets.short
+          history: 7d
+          value_type: FLOAT
+          status: DISABLED
+          units: pps
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            True if the packet was logged with the specified packet filter reason code. The known codes are: match, bad-offset, fragment, short, normalize, and memory.
+          preprocessing:
+            - type: CHANGE_PER_SECOND
+              parameters:
+                - ''
+          tags:
+            - tag: component
+              value: network
+        - uuid: ed902e8f05a34af8bdafc572d582d675
+          name: 'OPNsense: Packet filter running status'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.1.1.0
+          key: opnsense.pf.status
+          history: 7d
+          status: DISABLED
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            True if packet filter is currently enabled.
+          tags:
+            - tag: component
+              value: application
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 3e45fd6600214d158e4b8651ae986c4e
+              expression: 'last(/itNGO - OPNsense SNMP and API/opnsense.pf.status)<>1'
+              name: 'OPNsense: Packet filter is not running'
+              opdata: 'Current running state: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              description: 'Please check PF status.'
+              tags:
+                - tag: scope
+                  value: availability
+        - uuid: bcde248914864a3ea8120465872eced4
+          name: 'OPNsense: Firewall rules count'
+          type: SNMP_AGENT
+          snmp_oid: .1.3.6.1.4.1.12325.1.200.1.11.1.0
+          key: opnsense.rules.count
+          history: 7d
+          status: DISABLED
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            The number of labeled filter rules on this system.
+          tags:
+            - tag: component
+              value: firewall
+        - uuid: 036a3ac30a4b4c2485a4dcd149e552fd
+          name: 'OPNsense: Source tracking table current'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.4.1.0
+          key: opnsense.source.tracking.table.count
+          history: 7d
+          status: DISABLED
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            Number of entries in the source tracking table.
+          tags:
+            - tag: component
+              value: network
+        - uuid: 2bbd7eed4904427686d0c5ede39dea8b
+          name: 'OPNsense: Source tracking table limit'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.5.2.0
+          key: opnsense.source.tracking.table.limit
+          history: 7d
+          status: DISABLED
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            Maximum number of 'sticky-address' or 'source-track' rules in the ruleset.
+          tags:
+            - tag: component
+              value: network
+        - uuid: 5a3ea19f01fe47de8d5821b3311a4d40
+          name: 'OPNsense: Source tracking table utilization in %'
+          type: CALCULATED
+          key: opnsense.source.tracking.table.pused
+          history: 7d
+          value_type: FLOAT
+          status: DISABLED
+          units: '%'
+          params: 'last(//opnsense.source.tracking.table.count) * 100 / last(//opnsense.source.tracking.table.limit)'
+          description: 'Utilization of source tracking table in %.'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: 547a07769c7c4dbca1dc6029574501f2
+              expression: 'min(/itNGO - OPNsense SNMP and API/opnsense.source.tracking.table.pused,#3)>{$SOURCE.TRACKING.TABLE.UTIL.MAX}'
+              name: 'OPNsense: Source tracking table usage is high'
+              event_name: 'OPNsense: Source tracking table usage more than {$SOURCE.TRACKING.TABLE.UTIL.MAX}.'
+              opdata: 'Current utilization: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'Please check the number of sticky connections.'
+              tags:
+                - tag: scope
+                  value: capacity
+        - uuid: b7b9d98e9575441da87935986d1b75c9
+          name: 'OPNsense: States table current'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.3.1.0
+          key: opnsense.state.table.count
+          history: 7d
+          status: DISABLED
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            Number of entries in the state table.
+          tags:
+            - tag: component
+              value: network
+        - uuid: 9d16299067134ad69d368f43472499e0
+          name: 'OPNsense: States table limit'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.12325.1.200.1.5.1.0
+          key: opnsense.state.table.limit
+          history: 7d
+          status: DISABLED
+          description: |
+            MIB: BEGEMOT-PF-MIB
+            Maximum number of 'keep state' rules in the ruleset.
+          tags:
+            - tag: component
+              value: network
+        - uuid: 7b8d47f2769c439b9595e8c84427e49d
+          name: 'OPNsense: States table utilization in %'
+          type: CALCULATED
+          key: opnsense.state.table.pused
+          history: 7d
+          value_type: FLOAT
+          status: DISABLED
+          units: '%'
+          params: 'last(//opnsense.state.table.count) * 100 / last(//opnsense.state.table.limit)'
+          description: 'Utilization of state table in %.'
+          tags:
+            - tag: component
+              value: network
+          triggers:
+            - uuid: df3918c15e6149be914b6bb7abaf4a4a
+              expression: 'min(/itNGO - OPNsense SNMP and API/opnsense.state.table.pused,#3)>{$STATE.TABLE.UTIL.MAX}'
+              name: 'OPNsense: State table usage is high'
+              event_name: 'OPNsense: State table usage more than {$STATE.TABLE.UTIL.MAX}.'
+              opdata: 'Current utilization: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'Please check the number of connections.'
+              tags:
+                - tag: scope
+                  value: capacity
+        - uuid: b67df313c7ec43bc8e30cbc0a3c6449e
+          name: 'OPNsense Version'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.8072.1.3.2.3.1.2.7.118.101.114.115.105.111.110
+          key: opnsense.version
+          delay: 6h
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          inventory_link: SOFTWARE
+        - uuid: 79521312d4b24454a79f93e47eeebf60
+          name: 'OPNsense: SNMP agent availability'
+          type: INTERNAL
+          key: 'zabbix[host,snmp,available]'
+          history: 7d
+          description: |
+            Availability of SNMP checks on the host. The value of this item corresponds to availability icons in the host list.
+            Possible value:
+            0 - not available
+            1 - available
+            2 - unknown
+          tags:
+            - tag: component
+              value: health
+            - tag: component
+              value: network
+          triggers:
+            - uuid: a7b4dd377828411195ff6379cb65ae2e
+              expression: 'max(/itNGO - OPNsense SNMP and API/zabbix[host,snmp,available],{$SNMP.TIMEOUT})=0'
+              name: 'OPNsense: No SNMP data collection'
+              opdata: 'Current state: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'SNMP is not available for polling. Please check device connectivity and SNMP settings.'
+              tags:
+                - tag: scope
+                  value: availability
+      discovery_rules:
+        - uuid: 997638e330984c95a86f773c420a875c
+          name: 'Discover Gateway Names'
+          type: DEPENDENT
+          key: opnsense.gw.dsc
+          delay: '0'
+          status: DISABLED
+          lifetime: 2d
+          enabled_lifetime_type: DISABLE_NEVER
+          item_prototypes:
+            - uuid: a60dc8f34d58451fa34b9d2ec7974163
+              name: '{{#GWNAME}.regsub("\[\" ([A-Z].*)\"\]", \1)} Status'
+              type: DEPENDENT
+              key: 'opnsense.gw.status[{#GWNAME}]'
+              delay: '0'
+              history: 90d
+              value_type: TEXT
+              trends: '0'
+              preprocessing:
+                - type: JSONPATH
+                  parameters:
+                    - '$.items[?(@.name == "{{#GWNAME}.regsub("\[\" ([A-Z].*)\"\]", \1)}")].status_translated'
+                - type: TRIM
+                  parameters:
+                    - '["]'
+              master_item:
+                key: opnsense.gw.status.get
+          master_item:
+            key: opnsense.gw.status.get
+          lld_macro_paths:
+            - lld_macro: '{#GWNAME}'
+              path: $..NAME
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.items
+      macros:
+        - macro: '{$KEY}'
+        - macro: '{$ROUTER_URL}'
+        - macro: '{$SECRET}'
+  graphs:
+    - uuid: 9d5c31a132084a7f8240123cbfdcd277
+      name: 'OPNsense: Packet filter reason codes'
+      type: STACKED
+      ymin_type_1: FIXED
+      graph_items:
+        - color: 1A7C11
+          item:
+            host: 'itNGO - OPNsense SNMP and API'
+            key: opnsense.packets.match
+        - sortorder: '1'
+          color: 2774A4
+          item:
+            host: 'itNGO - OPNsense SNMP and API'
+            key: opnsense.packets.bad.offset
+        - sortorder: '2'
+          color: F63100
+          item:
+            host: 'itNGO - OPNsense SNMP and API'
+            key: opnsense.packets.fragment
+        - sortorder: '3'
+          color: A54F10
+          item:
+            host: 'itNGO - OPNsense SNMP and API'
+            key: opnsense.packets.short
+        - sortorder: '4'
+          color: FC6EA3
+          item:
+            host: 'itNGO - OPNsense SNMP and API'
+            key: opnsense.packets.normalize
+        - sortorder: '5'
+          color: 6C59DC
+          item:
+            host: 'itNGO - OPNsense SNMP and API'
+            key: opnsense.packets.mem.drop
